@@ -62,9 +62,6 @@
     buffer 1			; 背景画像の読み込み
     picload "tsuno.png"
 
-    buffer 2			; 背景画像の読み込み
-    picload "hebi.png"
-
     gsel 0
     
     repeat
@@ -119,11 +116,11 @@
     	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,210:mes "ゲームオーバーになったからかもしれないし、違うかもしれない"
     	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,240:mes "人間は愚かなので、今日も地球のどこかでドンパチやっている"
     	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,270:mes "とりあえずまだゲームは続けられるようだ…"
-    	color $FF,$FF,$FF:font "HG明朝E",16:pos (600- 8*15)/2,350:mes "続けるにはスペースキーを押してください"
+    	color $FF,$FF,$FF:font "HG明朝E",16:pos (600- 8*15)/2,350:mes "続けるにはエンターキーを押してください"
     	redraw 1
     	repeat
         	stick key
-        	if(key & $10):break
+        	if(key = 32):break
         	if(key & $80):end
         	await 20
     	loop
@@ -224,7 +221,7 @@
                 if FightCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
                 if  TamaCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
                 pos enemyX(cnt),enemyY(cnt)
-                gcopy 2,0,0,32,32
+                color $00,$FF,$FF:picload "hebi.png", 1
             }
             else:if(enemyZ(cnt)>1){
                 enemyZ(cnt)--
