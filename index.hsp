@@ -62,6 +62,9 @@
     buffer 1			; 背景画像の読み込み
     picload "tsuno.png"
 
+    buffer 2			; 背景画像の読み込み
+    picload "hebi.png"
+
     gsel 0
     
     repeat
@@ -221,7 +224,7 @@
                 if FightCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
                 if  TamaCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
                 pos enemyX(cnt),enemyY(cnt)
-                color $00,$FF,$FF:picload "hebi.png", 1
+                gcopy 2,0,0,32,32
             }
             else:if(enemyZ(cnt)>1){
                 enemyZ(cnt)--
@@ -263,8 +266,8 @@
 		pos 200,0
     	picload "heiwa.png", 1
     	color $99,$FF,$99:font "HG明朝E",50:pos (600-50*11)/2,80:mes "GAME CLEAR"
-    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,180:mes "おめでとう！"
-    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,210:mes "もしかするとTによる支配から解放されたかも！"
+    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,180:mes "おめでとう"
+    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,210:mes "もしかするとTによる支配から解放されたかもしれない"
     	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,240:mes "色々と事情が複雑で、解放されたと分かるまでは数年かかるようだ"
     	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,270:mes "それまで、引き続きゲームしながら待っていても問題ない"
     	color $FF,$FF,$FF:font "HG明朝E",16:pos (600- 8*15)/2,350:mes "続けるにはエンターキーを押してください"

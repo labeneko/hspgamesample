@@ -62,6 +62,9 @@
     buffer 1			; ”wŒi‰æ‘œ‚Ì“Ç‚İ‚İ
     picload "tsuno.png"
 
+    buffer 2			; ”wŒi‰æ‘œ‚Ì“Ç‚İ‚İ
+    picload "hebi.png"
+
     gsel 0
     
     repeat
@@ -221,7 +224,7 @@
                 if FightCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
                 if  TamaCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
                 pos enemyX(cnt),enemyY(cnt)
-                color $00,$FF,$FF:picload "hebi.png", 1
+                gcopy 2,0,0,32,32
             }
             else:if(enemyZ(cnt)>1){
                 enemyZ(cnt)--
@@ -258,7 +261,7 @@
     Score+=_score_
     if(Score>HiScore):HiScore=Score
 	// ˆê‰‚ÌƒQ[ƒ€ƒNƒŠƒA
-	if Score = 1000 {
+	if Score = 500 {
 		color $00,$00,$00:boxf
 		pos 200,0
     	picload "heiwa.png", 1

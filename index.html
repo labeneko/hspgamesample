@@ -203,7 +203,7 @@ Module.expectedDataFileDownloads++;
     }
     var PACKAGE_NAME = 'index.data';
     var REMOTE_PACKAGE_NAME = (Module['filePackagePrefixURL'] || '') + 'index.data';
-    var REMOTE_PACKAGE_SIZE = 555651;
+    var REMOTE_PACKAGE_SIZE = 555669;
     var PACKAGE_UUID = '51f84d03-0c74-4552-ac13-924e79e76977';
   
     function fetchRemotePackage(packageName, packageSize, callback, errback) {
@@ -304,13 +304,13 @@ function assert(check, msg) {
       },
     };
 
-      new DataRequest(0, 6786, 0, 0).open('GET', 'index.ax');
-      new DataRequest(6786, 9065, 0, 0).open('GET', 'bakuhatsu.png');
-      new DataRequest(9065, 106342, 0, 0).open('GET', 'bakuhatsu2.png');
-      new DataRequest(106342, 108321, 0, 0).open('GET', 'hebi.png');
-      new DataRequest(108321, 236833, 0, 0).open('GET', 'heiwa.png');
-      new DataRequest(236833, 238264, 0, 0).open('GET', 'labeneko.jpg');
-      new DataRequest(238264, 555651, 0, 0).open('GET', 'tsuno.png');
+      new DataRequest(0, 6804, 0, 0).open('GET', 'index.ax');
+      new DataRequest(6804, 9083, 0, 0).open('GET', 'bakuhatsu.png');
+      new DataRequest(9083, 106360, 0, 0).open('GET', 'bakuhatsu2.png');
+      new DataRequest(106360, 108339, 0, 0).open('GET', 'hebi.png');
+      new DataRequest(108339, 236851, 0, 0).open('GET', 'heiwa.png');
+      new DataRequest(236851, 238282, 0, 0).open('GET', 'labeneko.jpg');
+      new DataRequest(238282, 555669, 0, 0).open('GET', 'tsuno.png');
 
 
     function processPackageData(arrayBuffer) {
