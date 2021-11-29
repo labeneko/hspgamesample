@@ -1,0 +1,306 @@
+//------------------------------------------------------------------------------
+// シューティング・ゲームのミニ講座 for HSP(Ver.3.3.2)
+//==============================================================================
+// 第9回「完成ソース」by 科学太郎
+//------------------------------------------------------------------------------
+
+//--------------------------------------
+// メイン部
+//--------------------------------------
+*Init
+    ;スコアの管理
+    dim Score           ;現在スコア
+    dim HiScore         ;最高スコア
+    ;自機の管理
+    dim x               ;自機の横軸
+    dim y               ;自機の縦軸
+    dim fight           ;自機の残機数
+    dim blast           ;自機の爆発カウンタ
+    ;弾丸の管理
+    dim tamaF,10        ;有無フラグ
+    dim tamaX,10        ;弾丸の横軸
+    dim tamaY,10        ;弾丸の縦軸
+    ;敵機の管理
+    dim enemyF,20       ;有無フラグ
+    dim enemyX,20       ;敵機の横軸
+    dim enemyY,20       ;敵機の縦軸
+    dim enemyZ,20       ;敵機の爆発カウンタ
+    ;流星の管理
+    dim starF,50        ;有無フラグ
+    dim starX,50        ;流星の横軸
+    dim starY,50        ;流星の縦軸
+    ;スコアの初期化
+    Score=0
+    HiScore=9900
+    ;自機の初期化
+    x=(600-50)/2
+    y=(400-50)-16
+    fight=0
+    blast=0
+*Start
+    screen 0,600,400,SCREEN_FIXEDSIZE
+    title "らべねこシューティング"
+    redraw 0
+    color:boxf
+    color $00,$FF,$FF:font "HG明朝E",50:pos (600-50*11)/2,80:mes "シューティングゲーム"
+    color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,180:mes "20XX年　世界はダークプログラマーTに支配された――"
+    color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,210:mes "人類はTに対抗すべく、いろいろがんばった"
+    color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,240:mes "その後色々あって、とりあえずTが放つ蛇をたくさん倒せば、"
+    color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,270:mes "もしかしたら世界は救われるかもという話になった…"
+    color $FF,$FF,$FF:font "HG明朝E",16:pos (600- 8*15)/2,350:mes "とりあえずスペースキーを押してください"
+    redraw 1
+    repeat
+        stick key
+        if(key & $10):break
+        if(key & $80):end
+        await 20
+    loop
+*Main
+    font MSGOTHIC,50
+    randomize
+
+    buffer 1			; 背景画像の読み込み
+    picload "tsuno.png"
+
+    gsel 0
+    
+    repeat
+        redraw 0
+        
+        pos 0,0
+        gcopy 1,0,0,600,400
+
+        stick key,%11111
+        gosub *EnemyBirth
+        gosub *StarBirth
+        gosub *StarDraw
+        gosub *FightDraw
+        gosub *EnemyDraw
+        gosub *TamaDraw
+        gosub *TelopDraw
+        redraw 1
+        await (1000/60)
+    loop
+    stop
+//--------------------------------------
+// 自機の描画
+//--------------------------------------
+*FightDraw
+    if(blast==0){
+        if(key&1):x-=5:if(x<0):x=0
+        if(key&2):y-=5:if(y<0):y=0
+        if(key&4):x+=5:if(x>550):x=550
+        if(key&8):y+=5:if(y>350):y=350
+        if(key&16):gosub *TamaBirth
+        color $00,$FF,$00:pos x,y:picload "labeneko.jpg", 1
+    }
+    else:if(blast>1){
+        blast--
+        color $FF,$00,$00:pos x,y
+        picload "bakuhatsu.png", 1
+    }
+    else:if(fight){
+        fight--
+        blast=0
+        x=(600-50)/2
+        y=(400-50)-16
+    }
+    else{
+	    screen 0,600,400,SCREEN_FIXEDSIZE
+    	redraw 0
+    	color $00,$00,$00:boxf
+    	pos 200,0
+    	picload "bakuhatsu2.png", 1
+    	color $00,$FF,$00:font "HG明朝E",50:pos (600-50*11)/2,80:mes "GAME OVER"
+    	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,180:mes "地球のどこかで爆発が起きた"
+    	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,210:mes "ゲームオーバーになったからかもしれないし、違うかもしれない"
+    	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,240:mes "人間は愚かなので、今日も地球のどこかでドンパチやっている"
+    	color $FF,$00,$FF:font "HG明朝E",20:pos (600-50*11)/2,270:mes "とりあえずまだゲームは続けられるようだ…"
+    	color $FF,$FF,$FF:font "HG明朝E",16:pos (600- 8*15)/2,350:mes "続けるにはスペースキーを押してください"
+    	redraw 1
+    	repeat
+        	stick key
+        	if(key & $10):break
+        	if(key & $80):end
+        	await 20
+    	loop
+        //dialog "もう一度、ゲームを行いますか？",3,"ゲームオーバー"
+        //if(stat==7):end
+        ;スコアの初期化
+        Score=0
+        ;自機の初期化
+        x=(600-50)/2
+        y=(400-50)-16
+        fight=0
+        blast=0
+        ;配列の初期化
+        dim starF,50
+        dim tamaF,10
+        dim enemyF,20
+    }
+    return
+//--------------------------------------
+// 流星の発生
+//--------------------------------------
+*StarBirth
+    if(starCycle):starCycle--:return
+    foreach starF
+        if(starF(cnt)==0){
+            starF(cnt)=1
+            starX(cnt)=rnd(600)
+            starY(cnt)=0
+            break
+        }
+    loop
+    starCycle=3
+    return
+//--------------------------------------
+// 流星の描画
+//--------------------------------------
+*StarDraw
+    //color $00,$00,$00:boxf
+    foreach starF
+        if starF(cnt){
+            starY(cnt)+=2:if(starY(cnt)>=400):starF(cnt)=0:continue
+            color $FF,$FF,$00
+            pset starX(cnt),starY(cnt)
+        }
+    loop
+    return
+//--------------------------------------
+// 弾丸の発生
+//--------------------------------------
+*TamaBirth
+    if(tamaTrigg):tamaTrigg--:return
+    foreach tamaF
+        if(tamaF(cnt)==0){
+            tamaF(cnt)=1
+            tamaX(cnt)=x
+            tamaY(cnt)=y
+            break
+        }
+    loop
+    tamaTrigg=8
+    return
+//--------------------------------------
+// 弾丸の描画
+//--------------------------------------
+*TamaDraw
+    foreach tamaF
+        if tamaF(cnt){
+            tamaY(cnt)-=8:if(tamaY(cnt)<-50):tamaF(cnt)=0:continue
+            pos tamaX(cnt),tamaY(cnt)
+            color $FF,$FF,$00:mes "："
+        }
+    loop
+    return
+//--------------------------------------
+// 敵機の発生
+//--------------------------------------
+*EnemyBirth
+    if(enemyCycle):enemyCycle--:return
+    foreach enemyF
+        if(enemyF(cnt)==0){
+            enemyF(cnt)=1
+            enemyX(cnt)=rnd(600/50)*50
+            enemyY(cnt)=-50
+            enemyZ(cnt)=0
+            break
+        }
+    loop
+    enemyCycle=30
+    return
+//--------------------------------------
+// 敵機の描画
+//--------------------------------------
+*EnemyDraw
+    foreach enemyF
+        if enemyF(cnt){
+            if(enemyZ(cnt)==0){
+                enemyY(cnt)+=10:if(enemyY(cnt)>400)      :enemyF(cnt)=0:continue
+                if FightCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
+                if  TamaCrash(enemyX(cnt),enemyY(cnt))  :enemyZ(cnt)=60:ScoreCalc 100:continue
+                pos enemyX(cnt),enemyY(cnt)
+                color $00,$FF,$FF:picload "hebi.png", 1
+            }
+            else:if(enemyZ(cnt)>1){
+                enemyZ(cnt)--
+                color $FF,$00,$00:pos enemyX(cnt),enemyY(cnt)
+                picload "bakuhatsu.png", 1
+            }
+            else{
+                enemyF(cnt)=0
+            }
+        }
+    loop
+    return
+//--------------------------------------
+// テロップの描画
+//--------------------------------------
+*TelopDraw
+    msg=""
+    repeat fight
+        msg+="●"
+    loop
+    y(1)=0:x(1)=(20)
+    y(2)=0:x(2)=(600-20)-(16*11)
+    x(3)=0:y(3)=(400-20)
+    font MSGOTHIC,20,1
+    color $FF,$FF,$00:pos x(1),y(1):mes strf("Score:%08d",Score)
+    color $FF,$FF,$00:pos x(2),y(2):mes strf("HiScore:%08d",HiScore)
+    color $00,$FF,$00:pos x(3),y(3):mes msg
+    font MSGOTHIC,50
+    return
+//--------------------------------------
+// スコアの加算
+//--------------------------------------
+#deffunc ScoreCalc int _score_
+    Score+=_score_
+    if(Score>HiScore):HiScore=Score
+	// 一応のゲームクリア
+	if Score = 1000 {
+		color $00,$00,$00:boxf
+		pos 200,0
+    	picload "heiwa.png", 1
+    	color $99,$FF,$99:font "HG明朝E",50:pos (600-50*11)/2,80:mes "GAME CLEAR"
+    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,180:mes "おめでとう！"
+    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,210:mes "もしかするとTによる支配から解放されたかも！"
+    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,240:mes "色々と事情が複雑で、解放されたと分かるまでは数年かかるようだ"
+    	color $00,$CC,$FF:font "HG明朝E",20:pos (600-50*11)/2,270:mes "それまで、引き続きゲームしながら待っていても問題ない"
+    	color $FF,$FF,$FF:font "HG明朝E",16:pos (600- 8*15)/2,350:mes "続けるにはエンターキーを押してください"
+    	redraw 1
+    	repeat
+    		stick key
+       		if(key = 32):break
+       		if(key & $80):end
+       		await 20
+    	loop
+	}
+	return
+//--------------------------------------
+// 自機の衝突判定
+//--------------------------------------
+#defcfunc FightCrash int _x_,int _y_
+    if(blast==0)and(abs(x-_x_)<50)and(abs(y-_y_)<50){
+        blast=60
+        return 1
+    }
+    return 0
+//--------------------------------------
+// 自機弾の衝突判定
+//--------------------------------------
+#defcfunc TamaCrash int _x_,int _y_
+    n=0
+    foreach tamaF
+        if tamaF(cnt){
+            if(abs(tamaX(cnt)-_x_)<50)and(abs(tamaY(cnt)-_y_)<50){
+                tamaF(cnt)=0
+                n=1
+                break
+            }
+        }
+    loop
+    return n
+//------------------------------------------------------------------------------
+// End of lesson-9.hsp
+//----------------------------------------------------
